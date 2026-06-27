@@ -200,6 +200,123 @@ of the Windows Terminal title. See [Gotchas](#gotchas) below.
 
 ---
 
+## One-command install (PowerShell + winget)
+
+Prefer a script does Steps 1–6 for you? PasteThrough ships `install.ps1`, a
+PowerShell bootstrap that uses **winget** for everything it can and downloads
+the native-Windows zellij MSI from GitHub.
+
+It installs (skipping anything already present):
+
+- Windows Terminal (`Microsoft.WindowsTerminal`)
+- Node.js LTS (`OpenJS.NodeJS.LTS`)
+- AutoHotkey v2 (`AutoHotkey.AutoHotkey`)
+- Git (`Git.Git`)
+- zellij (native-Windows MSI, from the latest GitHub release)
+- pi (`npm install -g @earendil-works/pi-coding-agent`)
+
+…then clones PasteThrough to `C:\Tools\PasteThrough`.
+
+Run it (right-click `install.ps1` → **Run with PowerShell**, or in a
+PowerShell window):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+Override the install folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -InstallDir D:\Code\PasteThrough
+```
+
+> **winget missing?** It's called "App Installer" in the Microsoft Store
+> (preinstalled on most Windows 11 boxes). Or grab it from
+> <https://github.com/microsoft/winget-cli/releases>. After installing it,
+> re-run `install.ps1`.
+
+After it finishes, open a **new** Windows Terminal (so PATH updates),
+double-click `C:\Tools\PasteThrough\pastethrough.ahk`, and you're at Step 7
+of the Quick Start.
+
+---
+
+## Why the `.ahk` source (recommended) vs a compiled `.exe`
+
+PasteThrough is distributed as the **plain `.ahk` script**, not a compiled
+`.exe`. That's deliberate. Here's why, and when the `.exe` is still worth it.
+
+### Why the source is recommended
+
+1. **You can read it.** `pastethrough.ahk` is plain text. A tool that
+   intercepts your keyboard and reads your clipboard should be auditable —
+   you can open it in any editor and see exactly what it does before running
+   it. A compiled `.exe` is opaque binary.
+2. **No SmartScreen / Defender warnings.** Windows flags *unsigned* exes
+   downloaded from the internet with a scary "protected your PC" dialog, and
+   even many signed ones from unknown publishers. The `.ahk` runs through the
+   **already-trusted** AutoHotkey interpreter you installed in Step 4 — no
+   scary prompts, no reputation buildup needed.
+3. **Easy to edit and reload.** Want to change Ctrl+V to Alt+V, or add a
+   binding? Open the `.ahk` in a text editor, save, right-click the tray icon
+   → **Reload Script**. Done. An `.exe` requires recompiling.
+4. **Lighter.** The `.ahk` is ~4 KB and reuses your installed AutoHotkey. The
+   compiled `.exe` is ~1.3 MB because it bundles the whole interpreter.
+5. **It changes nothing about the other deps.** The `.exe` only replaces
+   AutoHotkey itself — you **still need Node + zellij installed**, because the
+   `.exe` shells out to `node pastethrough.js` and `zellij action write`. So
+   the `.exe` is not a "single self-contained double-click app"; it just saves
+   you the one AutoHotkey install.
+
+### When the `.exe` is still worth it
+
+- You can't or won't install AutoHotkey (e.g. a locked-down work machine where
+  you can drop an `.exe` in a folder but not install software).
+- You want a single double-clickable file in your Startup folder with zero
+  other setup on the hotkey side.
+
+In those cases, build the `.exe` from the source (next section) so it's
+trustworthy-by-construction — you compile it yourself from the readable
+script, rather than trusting a stranger's binary.
+
+---
+
+## Build the `.exe` yourself (optional)
+
+If you want a compiled `pastethrough.exe`, build it from the source so you know
+exactly what's inside. You need AutoHotkey v2 installed (Step 4 of the Quick
+Start, or `install.ps1`).
+
+**From cmd.exe / PowerShell** (recommended):
+
+```cmd
+cd C:\Tools\PasteThrough
+build.cmd
+```
+
+`build.cmd` calls Ahk2Exe with the correct v2 base and writes
+`pastethrough.exe` next to the script. Double-click that `.exe` instead of the
+`.ahk`; behavior is identical.
+
+**From Git Bash** (the `/in` `/out` `/base` flags get mangled by MSYS
+path-translation, so prefix with the env vars):
+
+```bash
+MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*" ./build.cmd
+```
+
+**Manual one-liner** (any shell, after fixing quoting for that shell):
+
+```cmd
+"C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe" /in pastethrough.ahk /out pastethrough.exe /base "C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe"
+```
+
+The repo's `.gitignore` excludes `*.exe`, so your build artifact stays out of
+version control. Ship prebuilt exes as **GitHub release assets** instead —
+attach `pastethrough.exe` to a release on the Releases page.
+
+---
+
 ## The projects involved
 
 This tool sits at the intersection of a few pieces. Here's what each one is:
@@ -622,6 +739,8 @@ auto-resolution doesn't find them.
 |-------------------|--------------------------------------------------------------------------------|
 | `pastethrough.js` | One-shot CLI: resolve session, write bracketed paste to focused pane.         |
 | `pastethrough.ahk`| AutoHotkey v2 hotkey: intercept Ctrl+V/Ctrl+Shift+V in Windows Terminal, call the CLI, fall back to normal paste. |
+| `install.ps1`     | One-command PowerShell bootstrap (winget + zellij MSI) for a fresh Windows box.|
+| `build.cmd`       | Compile `pastethrough.ahk` → `pastethrough.exe` via Ahk2Exe (optional).        |
 | `CHANGELOG.md`    | Release history.                                                               |
 | `LICENSE`         | GLWTS Public License.                                                          |
 

@@ -1,3 +1,7 @@
+# Build artifacts (the compiled .exe is shipped as a GitHub release asset, not committed)
+*.exe
+pastethrough-*.exe
+
 # Runtime artifacts
 pastethrough.log
 pastethrough-*.txt

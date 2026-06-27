@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-06-27
+
+### Added
+- **Beginner Quick Start** section in README: 10-step walkthrough for a fresh
+  Windows install (Windows Terminal, Node via nvm-windows, zellij, AutoHotkey
+  v2, pi, clone, start, paste with Ctrl+V vs Ctrl+Shift+V, verify, stop).
+- **`install.ps1`** — one-command PowerShell bootstrap using winget for
+  Windows Terminal / Node LTS / AutoHotkey v2 / Git, plus the native-Windows
+  zellij MSI from the GitHub release, then `npm i -g` pi and clones
+  PasteThrough. Idempotent; skips already-installed tools.
+- **`build.cmd`** — compiles `pastethrough.ahk` → `pastethrough.exe` via Ahk2Exe
+  (AutoHotkey v2 base). Documents the Git-Bash MSYS path-translation gotcha
+  (`MSYS_NO_PATHCONV=1`).
+- README sections: "One-command install (PowerShell + winget)",
+  "Why the `.ahk` source (recommended) vs a compiled `.exe`", and
+  "Build the `.exe` yourself (optional)".
+
+### Changed
+- `.gitignore` now excludes build artifacts (`*.exe`, `pastethrough-*.exe`);
+  compiled exes ship as GitHub release assets, not in the repo.
+
 ## [1.0.0] - 2026-06-27
 
 First public release.
