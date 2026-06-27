@@ -1,0 +1,13 @@
+# Runtime artifacts
+pastethrough.log
+pastethrough-*.txt
+
+# OS / editor junk
+nul
+.DS_Store
+Thumbs.db
+*.swp
+
+# Node
+node_modules/
+npm-debug.log*
