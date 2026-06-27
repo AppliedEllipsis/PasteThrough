@@ -16,6 +16,190 @@ firing each line as a separate submission.
 
 ---
 
+## Quick start (fresh Windows install)
+
+New to this? Follow these steps in order. Each installs one piece. You only do
+this once.
+
+### What you'll end up with
+
+```
+Windows Terminal  ->  zellij (panes/tabs)  ->  pi (AI coding agent)
+                                   ^
+                          PasteThrough fixes pasting into here
+```
+
+### Step 1 — Install Windows Terminal
+
+If you're on Windows 11 it's probably already installed. If not:
+
+- **Microsoft Store:** search "Windows Terminal" → Install.
+- Or download from <https://github.com/microsoft/terminal/releases>.
+
+Open it once to confirm it runs. Close it.
+
+### Step 2 — Install Node.js (via nvm-windows)
+
+Node runs the `pastethrough.js` helper. The easiest way is **nvm-windows**
+(Node Version Manager), which lets you install Node without admin pain later.
+
+1. Download the latest **nvm-setup.exe** from
+   <https://github.com/coreybutler/nvm-windows/releases>.
+2. Run the installer (next → next → finish). It adds `nvm` to your PATH.
+3. Open a **new** Windows Terminal window (so PATH updates) and run:
+
+```powershell
+nvm install lts
+nvm use lts
+node --version
+```
+
+The last command should print something like `v22.x.x`. If it does, Node is
+ready. (If `node --version` says "not found", close and reopen Windows Terminal
+so PATH refreshes.)
+
+> Prefer not to use nvm? Grab the official LTS installer from
+> <https://nodejs.org> instead. Either way you just need `node` on your PATH.
+
+### Step 3 — Install zellij (native Windows)
+
+zellij is the terminal multiplexer. As of v0.44 it runs natively on Windows —
+no WSL needed.
+
+1. Download the Windows build from
+   <https://github.com/zellij-org/zellij/releases> (look for the
+   `x86_64-pc-windows-gnu.zip` asset).
+2. Unzip it. You'll get `zellij.exe`.
+3. Put `zellij.exe` somewhere permanent, e.g. `C:\Tools\zellij\`.
+4. Add that folder to your **PATH**:
+   - Win key → type "env" → "Edit the system environment variables" →
+     "Environment variables…" → under "User variables" edit `Path` → New →
+     paste `C:\Tools\zellij` → OK all the way out.
+5. Open a **new** Windows Terminal and verify:
+
+```powershell
+zellij --version
+```
+
+Should print `zellij 0.44.3` (or newer).
+
+### Step 4 — Install AutoHotkey v2
+
+AutoHotkey provides the Ctrl+V hotkey. You need **v2** (not v1).
+
+1. Download **AutoHotkey v2** from <https://www.autohotkey.com/> (the green
+   "Download" button gives the v2 installer).
+2. Run the installer. Accept the defaults.
+3. Verify: AutoHotkey is now associated with `.ahk` files.
+
+### Step 5 — Install pi (the coding agent)
+
+pi is the AI coding agent you'll actually be pasting into. Install it with npm
+(which came with Node in Step 2):
+
+```powershell
+npm install -g @earendil-works/pi-coding-agent
+```
+
+Verify:
+
+```powershell
+pi --version
+```
+
+(See the [pi docs](https://github.com/earendil-works/pi-coding-agent) if you
+need to set up an API key for your model provider — that's separate from
+PasteThrough.)
+
+### Step 6 — Get PasteThrough
+
+Pick a permanent folder, e.g. `C:\Tools\PasteThrough`, and clone the repo:
+
+```powershell
+cd C:\Tools
+git clone https://github.com/AppliedEllipsis/PasteThrough.git
+```
+
+No git? You can instead download the ZIP from the repo page (green "Code"
+button → "Download ZIP") and unzip it to `C:\Tools\PasteThrough`.
+
+You should now have these two key files in that folder:
+
+```
+C:\Tools\PasteThrough\
+    pastethrough.js     # the helper (Node)
+    pastethrough.ahk    # the hotkey (AutoHotkey)
+```
+
+### Step 7 — Start PasteThrough
+
+Double-click `pastethrough.ahk`. A green "H" icon appears in your system tray
+(bottom-right). It's running. That's it — there's no window.
+
+> **Make it start with Windows (optional):** Win+R → type `shell:startup` →
+> Enter → drop a shortcut to `pastethrough.ahk` in that folder. Now it auto-runs
+> on every login.
+
+### Step 8 — Use it: open zellij, start pi, paste
+
+Open Windows Terminal and start a zellij session:
+
+```powershell
+zellij
+```
+
+You're now inside zellij. Split a pane or just use the first one, and start pi:
+
+```powershell
+pi
+```
+
+Pi's input prompt appears. Now copy any **multiline** text from anywhere — a
+code snippet from a browser, a few paragraphs, a stack trace.
+
+**Paste with Ctrl+V** (the normal way):
+
+- Without PasteThrough: each line fires as a separate message. Disaster.
+- With PasteThrough running: the **whole block lands as one draft** in pi's
+  input box. You can edit it, then press **Enter** once to submit.
+
+**Paste with Ctrl+Shift+V** (the "plain text" variant):
+
+- PasteThrough binds this too, to the same handler. It also lands as one clean
+  draft — useful when an app would otherwise paste formatted/rich text.
+
+> Either key works. The difference is just habit: use Ctrl+V normally; use
+> Ctrl+Shift+V when you want to be sure formatting is stripped. Both give you
+> one draft, never N submissions.
+
+### Step 9 — Verify it's working
+
+1. Copy this exact three-line block:
+
+```
+line one
+line two
+line three
+```
+
+2. In the pi pane, press **Ctrl+V**.
+3. You should see all three lines sitting in pi's input box as **one draft** —
+   not three submitted messages.
+4. Press **Esc** to clear the draft (or Enter to submit it).
+
+If instead you see three separate submissions, PasteThrough isn't running
+(check the tray for the green "H") or zellij's session name isn't at the front
+of the Windows Terminal title. See [Gotchas](#gotchas) below.
+
+### Step 10 — Stop or remove PasteThrough
+
+- **Pause it:** right-click the tray "H" icon → **Suspend Hotkeys**. Ctrl+V
+  reverts to Windows Terminal's normal paste.
+- **Quit it:** right-click the tray "H" icon → **Exit**.
+- **Stop auto-start:** delete the shortcut from `shell:startup`.
+
+---
+
 ## The projects involved
 
 This tool sits at the intersection of a few pieces. Here's what each one is:
